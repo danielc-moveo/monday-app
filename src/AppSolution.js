@@ -5,7 +5,13 @@ import useRecorder from "./components/useRecorder";
 import { useCallback } from "react";
 import { _blobToFile, _createUpdate, _addFileToUpdate } from "./utils/helper";
 import { mondayInstance } from "./api/monday";
-import {MainScreen} from './components/MainScreen'
+import { StartRecording } from "./components/StartRecording";
+import { RecordingPlayer } from "./components/RecordingPlayer";
+import { Header } from "./components/Header";
+import styled from "styled-components";
+import { FlexedColCenter } from "./ui/Layouts";
+
+const Container = styled(FlexedColCenter)``;
 
 const AppSolution = () => {
   // const [settings, setSettings] = useState(null);
@@ -39,10 +45,29 @@ const AppSolution = () => {
     }
   }, [blob, _handleBlob]);
 
+  const startRecord = () => {
+    startRecording();
+  };
+  const stopRecord = () => {
+    stopRecording();
+  };
+  const deleteRecord = () => {};
+
   return (
     <div className="App">
-      <MainScreen />
-      {/* {userName && `Hello, ${userName}`}
+      <Container>
+        <Header />
+        {!isRecording && !blob ? (
+          <StartRecording startRecord={startRecord} />
+        ) : (
+          <RecordingPlayer
+            stopRecord={stopRecord}
+            deleteRecord={deleteRecord}
+            src={audioURL}
+          />
+        )}
+
+        {/* {userName && `Hello, ${userName}`}
       <audio src={audioURL} controls />
       <button onClick={startRecording} disabled={isRecording}>
         start recording
@@ -50,6 +75,7 @@ const AppSolution = () => {
       <button onClick={stopRecording} disabled={!isRecording}>
         stop recording
       </button> */}
+      </Container>
     </div>
   );
 };
