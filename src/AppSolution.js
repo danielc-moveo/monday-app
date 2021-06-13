@@ -5,6 +5,7 @@ import useRecorder from "./components/useRecorder";
 import { useCallback } from "react";
 import { _blobToFile, _createUpdate, _addFileToUpdate } from "./utils/helper";
 import { mondayInstance } from "./api/monday";
+import {MainScreen} from './components/MainScreen'
 
 const AppSolution = () => {
   // const [settings, setSettings] = useState(null);
@@ -40,14 +41,15 @@ const AppSolution = () => {
 
   return (
     <div className="App">
-      {userName && `Hello, ${userName}`}
+      <MainScreen />
+      {/* {userName && `Hello, ${userName}`}
       <audio src={audioURL} controls />
       <button onClick={startRecording} disabled={isRecording}>
         start recording
       </button>
       <button onClick={stopRecording} disabled={!isRecording}>
         stop recording
-      </button>
+      </button> */}
     </div>
   );
 };
