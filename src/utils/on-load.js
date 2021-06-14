@@ -1,7 +1,6 @@
 export const getContext = async (mondayInstance) => {
   try {
     const contextResponse = await mondayInstance.get("context");
-    debugger;
     const { itemId, theme } = contextResponse.data;
     return {
       msg: "success",

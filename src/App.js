@@ -6,6 +6,7 @@ import "monday-ui-react-core/dist/main.css";
 // import AttentionBox from "monday-ui-react-core/dist/AttentionBox.js";
 import AppSolution from "./AppSolution";
 import { mondayInstance } from "./api/monday";
+
 // const monday = mondaySdk();
 
 class App extends React.Component {

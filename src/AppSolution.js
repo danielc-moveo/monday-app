@@ -9,20 +9,29 @@ import styled from "styled-components";
 import { FlexedColCenter } from "./ui/Layouts";
 import { sendVoiceMessage } from "./utils/add-voice";
 import { getContext, getVoiceMessagesHistory } from "./utils/on-load";
+import { ThemeProvider } from "styled-components";
+import { darkTheme, lightTheme } from "./ui/Theme";
 
-const Container = styled(FlexedColCenter)``;
+const Container = styled(FlexedColCenter)`
+  background: ${({ theme }) => theme.background};
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+`;
+const Wrapper = styled(FlexedColCenter)``;
 
 const AppSolution = ({ mondayInstance }) => {
   const [currentItemId, setCurrentItemId] = useState(null);
   const [messagesHistory, setMessagesHistory] = useState([]);
+  const [theme, setTheme] = useState("");
 
   const [error, setError] = useState(null);
 
-  let [audioURL, isRecording, startRecording, stopRecording, blob, setBlob] =
-    useRecorder();
+  // let [audioURL, isRecording, startRecording, stopRecording, blob, setBlob] =
+  //   useRecorder();
 
   const handleAdd = useCallback(
-    async (title) => {
+    async (title, blob) => {
       const messageNumber = messagesHistory ? messagesHistory.length + 1 : 0;
       const params = {
         mondayInstance,
@@ -36,12 +45,13 @@ const AppSolution = ({ mondayInstance }) => {
         setError(response.msg);
       }
     },
-    [currentItemId, mondayInstance, messagesHistory, blob]
+    [currentItemId, mondayInstance, messagesHistory]
   );
 
   useEffect(() => {
     const fetchData = async () => {
       const { itemIdResponse, theme } = await getContext(mondayInstance);
+      setTheme(theme);
       setCurrentItemId(itemIdResponse);
       const response = await getVoiceMessagesHistory(
         mondayInstance,
@@ -49,58 +59,37 @@ const AppSolution = ({ mondayInstance }) => {
       );
       const { messagesHistory, msg } = response;
       if (msg === "success" && messagesHistory) {
-        debugger;
         setMessagesHistory([...messagesHistory]);
       }
     };
     fetchData();
   }, [mondayInstance]);
 
-  const startRecord = () => {
-    startRecording();
-  };
-
-  const stopRecord = () => {
-    stopRecording();
-  };
-
-  const deleteRecord = () => {
-    stopRecording();
-    setBlob(null);
-  };
+  const themeMode = theme === "light" ? lightTheme : darkTheme;
 
   return (
-    <div className="App">
+    <ThemeProvider theme={themeMode}>
       <Container>
-        <Header />
-        {!isRecording && !blob ? (
-          <StartRecording startRecord={startRecord} />
-        ) : (
-          <RecordingPlayer
-            stopRecord={stopRecord}
-            deleteRecord={deleteRecord}
-            isRecording={isRecording}
-            src={audioURL}
-            handleAdd={handleAdd}
-            blob={blob}
-          />
-        )}
-      </Container>
+        <Wrapper>
+          <Header />
+          <RecordingPlayer handleAdd={handleAdd} />
+        </Wrapper>
 
-      {messagesHistory.length > 0 &&
-        messagesHistory.map((message, i) => (
-          <div style={{ marginBottom: "10px" }}>
-            <div>
-              <div style={{ color: "white", marginBottom: "4px" }}>
-                {`${message.creatorName} ${i + 1}`}
+        {messagesHistory.length > 0 &&
+          messagesHistory.map((message, i) => (
+            <div style={{ marginBottom: "10px" }}>
+              <div>
+                <div style={{ color: "white", marginBottom: "4px" }}>
+                  {`${message.creatorName} ${i + 1}`}
+                </div>
+              </div>
+              <div>
+                <audio src={message.assetSrc} controls />
               </div>
             </div>
-            <div>
-              <audio src={message.assetSrc} controls />
-            </div>
-          </div>
-        ))}
-    </div>
+          ))}
+      </Container>
+    </ThemeProvider>
   );
 };
 
