@@ -32,9 +32,7 @@ export const getVoiceMessagesHistory = async (mondayInstance, itemId) => {
 
     return { msg: "success", messagesHistory: processedUpdates };
   } catch (error) {
-    return {
-      msg: error.message,
-    };
+    return null;
   }
 };
 

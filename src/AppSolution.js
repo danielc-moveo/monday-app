@@ -3,9 +3,15 @@ import "./App.css";
 import "react-voice-recorder/dist/index.css";
 import useRecorder from "./components/useRecorder";
 import { useCallback } from "react";
+import { StartRecording } from "./components/StartRecording";
+import { RecordingPlayer } from "./components/RecordingPlayer";
+import { Header } from "./components/Header";
+import styled from "styled-components";
+import { FlexedColCenter } from "./ui/Layouts";
 import { sendVoiceMessage } from "./utils/add-voice";
 import { getCurrentItemID, getVoiceMessagesHistory } from "./utils/on-load";
-import { MainScreen } from "./components/MainScreen";
+
+const Container = styled(FlexedColCenter)``;
 
 const AppSolution = ({ mondayInstance }) => {
   const [currentItemId, setCurrentItemId] = useState(null);
@@ -17,11 +23,12 @@ const AppSolution = ({ mondayInstance }) => {
 
   const handleAdd = useCallback(
     async (blob) => {
+      const messageNumber = messagesHistory ? messagesHistory.length() + 1 : 0;
       const params = {
         mondayInstance,
         blob,
         currentItemId,
-        messageNumber: messagesHistory.length() + 1,
+        messageNumber,
         voiceMessageTitle: "a dummy title",
       };
       const response = await sendVoiceMessage(params);
@@ -51,36 +58,48 @@ const AppSolution = ({ mondayInstance }) => {
     fetchData();
   }, [mondayInstance]);
 
+  const startRecord = () => {
+    startRecording();
+  };
+  const stopRecord = () => {
+    stopRecording();
+  };
+  const deleteRecord = () => {
+    stopRecording();
+    blob = null;
+    debugger;
+  };
+
   return (
-    <div
-      style={{ display: "flex", justifyContent: "space-around", width: "100%" }}
-    >
-      {error && <div>{error}</div>}
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <MainScreen />
-        <audio src={audioURL} controls />
-        <button onClick={startRecording} disabled={isRecording}>
-          start recording
-        </button>
-        <button onClick={stopRecording} disabled={!isRecording}>
-          stop recording
-        </button>
-      </div>
-      <div>
-        {messagesHistory &&
-          messagesHistory.map((message, i) => (
-            <div style={{ marginBottom: "10px" }}>
-              <div>
-                <div style={{ color: "white", marginBottom: "4px" }}>
-                  {`${message.creatorName} ${i + 1}`}
-                </div>
-              </div>
-              <div>
-                <audio src={message.assetSrc} controls />
+    <div className="App">
+      <Container>
+        <Header />
+        {!isRecording && !blob ? (
+          <StartRecording startRecord={startRecord} />
+        ) : (
+          <RecordingPlayer
+            stopRecord={stopRecord}
+            deleteRecord={deleteRecord}
+            isRecording={isRecording}
+            src={audioURL}
+            blob={blob}
+          />
+        )}
+      </Container>
+
+      {messagesHistory &&
+        messagesHistory.map((message, i) => (
+          <div style={{ marginBottom: "10px" }}>
+            <div>
+              <div style={{ color: "white", marginBottom: "4px" }}>
+                {`${message.creatorName} ${i + 1}`}
               </div>
             </div>
-          ))}
-      </div>
+            <div>
+              <audio src={message.assetSrc} controls />
+            </div>
+          </div>
+        ))}
     </div>
   );
 };
