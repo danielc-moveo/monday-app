@@ -23,8 +23,8 @@ const useRecorder = () => {
     }
 
     // Obtain the audio when ready.
-    const handleData = e => {
-        setBlob(e.data);
+    const handleData = (e) => {
+      setBlob(e.data);
       setAudioURL(URL.createObjectURL(e.data));
     };
 
@@ -40,7 +40,7 @@ const useRecorder = () => {
     setIsRecording(false);
   };
 
-  return [audioURL, isRecording, startRecording, stopRecording,blob];
+  return [audioURL, isRecording, startRecording, stopRecording, blob, setBlob];
 };
 
 async function requestRecorder() {

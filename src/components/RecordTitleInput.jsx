@@ -22,13 +22,12 @@ const AddBtn = styled.button`
   cursor: pointer;
 `;
 
-export const RecordTitleInput = ({}) => {
+export const RecordTitleInput = ({ handleAdd }) => {
   const [title, setTitle] = useState("");
 
   const handleChange = (e) => {
     setTitle(e.target.value);
   };
-  const handleAdd = () => {};
   return (
     <>
       <TitleInput
@@ -37,7 +36,7 @@ export const RecordTitleInput = ({}) => {
         value={title}
         onChange={(e) => handleChange(e)}
       />
-      <AddBtn onClick={handleAdd}>ADD</AddBtn>
+      <AddBtn onClick={() => handleAdd(title)}>ADD</AddBtn>
     </>
   );
 };

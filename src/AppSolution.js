@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import "react-voice-recorder/dist/index.css";
 import useRecorder from "./components/useRecorder";
 import { useCallback } from "react";
 import { StartRecording } from "./components/StartRecording";
@@ -9,51 +8,50 @@ import { Header } from "./components/Header";
 import styled from "styled-components";
 import { FlexedColCenter } from "./ui/Layouts";
 import { sendVoiceMessage } from "./utils/add-voice";
-import { getCurrentItemID, getVoiceMessagesHistory } from "./utils/on-load";
+import { getContext, getVoiceMessagesHistory } from "./utils/on-load";
 
 const Container = styled(FlexedColCenter)``;
 
 const AppSolution = ({ mondayInstance }) => {
   const [currentItemId, setCurrentItemId] = useState(null);
-  const [messagesHistory, setMessagesHistory] = useState(null);
+  const [messagesHistory, setMessagesHistory] = useState([]);
+
   const [error, setError] = useState(null);
 
-  let [audioURL, isRecording, startRecording, stopRecording, blob] =
+  let [audioURL, isRecording, startRecording, stopRecording, blob, setBlob] =
     useRecorder();
 
   const handleAdd = useCallback(
-    async (blob) => {
-      const messageNumber = messagesHistory ? messagesHistory.length() + 1 : 0;
+    async (title) => {
+      const messageNumber = messagesHistory ? messagesHistory.length + 1 : 0;
       const params = {
         mondayInstance,
         blob,
         currentItemId,
         messageNumber,
-        voiceMessageTitle: "a dummy title",
+        voiceMessageTitle: title,
       };
       const response = await sendVoiceMessage(params);
-      if (!response.msg === "success") {
+      if (response.msg !== "success") {
         setError(response.msg);
       }
     },
-    [currentItemId, mondayInstance, messagesHistory]
+    [currentItemId, mondayInstance, messagesHistory, blob]
   );
 
   useEffect(() => {
-    if (blob) {
-      handleAdd(blob);
-    }
-  }, [blob, handleAdd]);
-
-  useEffect(() => {
     const fetchData = async () => {
-      const { itemIdResponse } = await getCurrentItemID(mondayInstance);
+      const { itemIdResponse, theme } = await getContext(mondayInstance);
       setCurrentItemId(itemIdResponse);
-      const messagesHistory = await getVoiceMessagesHistory(
+      const response = await getVoiceMessagesHistory(
         mondayInstance,
         itemIdResponse
       );
-      if (messagesHistory) setMessagesHistory([...messagesHistory]);
+      const { messagesHistory, msg } = response;
+      if (msg === "success" && messagesHistory) {
+        debugger;
+        setMessagesHistory([...messagesHistory]);
+      }
     };
     fetchData();
   }, [mondayInstance]);
@@ -61,13 +59,14 @@ const AppSolution = ({ mondayInstance }) => {
   const startRecord = () => {
     startRecording();
   };
+
   const stopRecord = () => {
     stopRecording();
   };
+
   const deleteRecord = () => {
     stopRecording();
-    blob = null;
-    debugger;
+    setBlob(null);
   };
 
   return (
@@ -82,12 +81,13 @@ const AppSolution = ({ mondayInstance }) => {
             deleteRecord={deleteRecord}
             isRecording={isRecording}
             src={audioURL}
+            handleAdd={handleAdd}
             blob={blob}
           />
         )}
       </Container>
 
-      {messagesHistory &&
+      {messagesHistory.length > 0 &&
         messagesHistory.map((message, i) => (
           <div style={{ marginBottom: "10px" }}>
             <div>

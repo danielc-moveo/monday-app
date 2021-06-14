@@ -1,10 +1,12 @@
-export const getCurrentItemID = async (mondayInstance) => {
+export const getContext = async (mondayInstance) => {
   try {
     const contextResponse = await mondayInstance.get("context");
-    const { itemId } = contextResponse.data;
+    debugger;
+    const { itemId, theme } = contextResponse.data;
     return {
       msg: "success",
       itemIdResponse: itemId,
+      theme,
     };
   } catch (error) {
     return { msg: error.message };
@@ -29,10 +31,9 @@ export const getVoiceMessagesHistory = async (mondayInstance, itemId) => {
       mondayInstance,
       updatesResponse
     );
-
     return { msg: "success", messagesHistory: processedUpdates };
   } catch (error) {
-    return null;
+    return { msg: error.message };
   }
 };
 

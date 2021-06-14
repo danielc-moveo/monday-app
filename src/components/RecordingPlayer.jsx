@@ -25,6 +25,7 @@ export const RecordingPlayer = ({
   deleteRecord,
   isRecording,
   src,
+  handleAdd,
   blob,
 }) => {
   const [isReplay, setIsReplay] = useState(false);
@@ -45,9 +46,11 @@ export const RecordingPlayer = ({
         <audio src={src} controls ref={audioRef} />
       </AudioContainer>
       <PlayerContainer>
-        <IconBtn onClick={deleteRecord}>
-          <TrashIcon />
-        </IconBtn>
+        {blob && (
+          <IconBtn onClick={deleteRecord}>
+            <TrashIcon />
+          </IconBtn>
+        )}
         {isRecording ? (
           <IconBtn onClick={stopRecord}>
             <RecordIcon />
@@ -62,7 +65,7 @@ export const RecordingPlayer = ({
           </IconBtn>
         )}
       </PlayerContainer>
-      {!isRecording ? <RecordTitleInput /> : null}
+      {!isRecording ? <RecordTitleInput handleAdd={handleAdd} /> : null}
     </>
   );
 };
