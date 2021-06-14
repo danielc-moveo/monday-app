@@ -1,7 +1,14 @@
 import React from "react";
 import { Colors } from "../ui/Colors";
-import { Header1, Header2, Header3, FlexedColCenter } from "../ui/Layouts";
+import {
+  Header1,
+  Header2,
+  Header3,
+  FlexedColCenter,
+  IconBtn,
+} from "../ui/Layouts";
 import styled from "styled-components";
+import { ReactComponent as MicIcon } from "../ui/icons/Mic.svg";
 
 const ActionText = styled(Header3)`
   color: ${Colors.grey};
@@ -10,7 +17,10 @@ const ActionText = styled(Header3)`
 export const StartRecording = ({ startRecord }) => {
   return (
     <>
-      <button onClick={startRecord}>mic icon</button>
+      <IconBtn onClick={startRecord}>
+        <MicIcon />
+      </IconBtn>
+
       <ActionText>Start recording now</ActionText>
     </>
   );

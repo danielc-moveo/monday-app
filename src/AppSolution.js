@@ -51,7 +51,11 @@ const AppSolution = () => {
   const stopRecord = () => {
     stopRecording();
   };
-  const deleteRecord = () => {};
+  const deleteRecord = () => {
+    stopRecording();
+    blob = null;
+    debugger;
+  };
 
   return (
     <div className="App">
@@ -63,7 +67,9 @@ const AppSolution = () => {
           <RecordingPlayer
             stopRecord={stopRecord}
             deleteRecord={deleteRecord}
+            isRecording={isRecording}
             src={audioURL}
+            blob={blob}
           />
         )}
 

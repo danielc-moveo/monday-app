@@ -13,3 +13,9 @@ export const FlexedColCenter = styled.div`
   flex-direction: column;
   align-items: center;
 `;
+export const IconBtn = styled.button`
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+`;
