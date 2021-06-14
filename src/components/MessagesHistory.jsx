@@ -1,6 +1,6 @@
 import React from "react";
 
-const MessagesHistory = ({ messagesHistory }) => {
+const MessagesHistory = ({ messagesHistory, handleDeleteVmFromDb }) => {
   return (
     <div>
       {messagesHistory.map((message, i) => (
@@ -13,6 +13,9 @@ const MessagesHistory = ({ messagesHistory }) => {
           <div>
             <audio src={message.assetSrc} controls />
           </div>
+          <button onClick={() => handleDeleteVmFromDb(message.updateId)}>
+            Delete
+          </button>
         </div>
       ))}
     </div>

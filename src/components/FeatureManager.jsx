@@ -10,21 +10,24 @@ import { FlexedColCenter } from "../ui/Layouts";
 import { sendVoiceMessage } from "../utils/add-voice";
 import { getContext, getVoiceMessagesHistory } from "../utils/on-load";
 import MessagesHistory from "./MessagesHistory";
+import Loader from "monday-ui-react-core/dist/Loader.js";
 
 const Container = styled.div`
   text-align: center;
   margin: 49px auto 32px auto;
   height: ${({ hasHistory }) => (hasHistory ? "198px" : "auto")};
-  border-bottom: ${({ hasHistory }) => (hasHistory && "1px solid #E6E9EF")};
-  width:100%;
+  border-bottom: ${({ hasHistory }) => hasHistory && "1px solid #E6E9EF"};
+  width: 100%;
 `;
+
 const Wrapper = styled(FlexedColCenter)`
-width:100%;
+  width: 100%;
 `;
 
 const FeatureManager = ({ mondayInstance }) => {
   const [currentItemId, setCurrentItemId] = useState(null);
   const [messagesHistory, setMessagesHistory] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [error, setError] = useState(null);
 
@@ -33,6 +36,7 @@ const FeatureManager = ({ mondayInstance }) => {
 
   const handleAdd = useCallback(
     async (title) => {
+      setIsLoading(true);
       const messageNumber = messagesHistory ? messagesHistory.length + 1 : 0;
       const params = {
         mondayInstance,
@@ -42,6 +46,7 @@ const FeatureManager = ({ mondayInstance }) => {
         voiceMessageTitle: title,
       };
       const response = await sendVoiceMessage(params);
+      setIsLoading(false);
       if (response.msg !== "success") {
         setError(response.msg);
       }
@@ -51,6 +56,7 @@ const FeatureManager = ({ mondayInstance }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       const { itemIdResponse, theme } = await getContext(mondayInstance);
       setCurrentItemId(itemIdResponse);
       const response = await getVoiceMessagesHistory(
@@ -61,6 +67,7 @@ const FeatureManager = ({ mondayInstance }) => {
       if (msg === "success" && messagesHistory) {
         setMessagesHistory([...messagesHistory]);
       }
+      setIsLoading(false);
     };
     fetchData();
   }, [mondayInstance]);
@@ -78,9 +85,14 @@ const FeatureManager = ({ mondayInstance }) => {
     setBlob(null);
   };
 
+  const handleDeleteVmFromDb = async (updateId) => {
+    const response = await deleteVmFromDb(updateId);
+  };
+
   const hasHistory = messagesHistory.length > 0;
   return (
     <Wrapper>
+      {isLoading && <Loader />}
       <Container hasHistory={hasHistory}>
         {!hasHistory && <WelcomeHeader />}
         {!isRecording && !blob ? (
@@ -101,7 +113,10 @@ const FeatureManager = ({ mondayInstance }) => {
       </Container>
 
       {messagesHistory.length > 0 && (
-        <MessagesHistory messagesHistory={messagesHistory} />
+        <MessagesHistory
+          messagesHistory={messagesHistory}
+          handleDelete={handleDeleteVmFromDb}
+        />
       )}
     </Wrapper>
   );

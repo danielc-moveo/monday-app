@@ -36,7 +36,9 @@ export const RecordTitleInput = ({ handleAdd }) => {
         value={title}
         onChange={(e) => handleChange(e)}
       />
-      <AddBtn onClick={() => handleAdd(title)}>ADD</AddBtn>
+      <AddBtn disabled={!title} onClick={() => handleAdd(title)}>
+        ADD
+      </AddBtn>
     </>
   );
 };

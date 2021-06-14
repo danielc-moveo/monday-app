@@ -3,10 +3,8 @@ import "./App.css";
 // import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
 //Explore more Monday React Components here: https://style.monday.com/
-// import AttentionBox from "monday-ui-react-core/dist/AttentionBox.js";
 import FeatureManager from "./components/FeatureManager";
 import { mondayInstance } from "./api/monday";
-// const monday = mondaySdk();
 
 class App extends React.Component {
   constructor(props) {

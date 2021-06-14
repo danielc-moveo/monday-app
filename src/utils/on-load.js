@@ -58,7 +58,10 @@ const getProcessedUpdates = async (mondayInstance, updatesResponse) => {
 };
 
 const filterAssetsByAssetType = (assets) => {
-  return assets.filter(({ public_url }) => public_url.includes(".webm"));
+  return assets.filter(
+    ({ public_url }) =>
+      public_url.includes(`voice_description`) && public_url.includes(`.webm`)
+  );
 };
 
 const getCreatorName = async (mondayInstance, creator_id) => {

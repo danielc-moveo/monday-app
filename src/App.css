@@ -9,3 +9,8 @@ body {
   display: flex;
   justify-content: center;
 }
+
+.monday-loader-component .circle-loader-spinner {
+  width: 30px !important;
+  height: 30px;
+}
