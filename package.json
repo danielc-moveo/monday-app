@@ -20,13 +20,8 @@
     "monday-ui-react-core": "0.0.48",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
-    "react-mp3-recorder": "^1.1.2",
-    "react-scripts": "3.4.0",
-    "react-video-recorder": "^3.18.1",
-    "react-voice-recorder": "^2.1.0",
-    "styled-components": "^4.4.1",
-    "video-converter": "^1.0.0",
-    "webm-to-mp4": "^1.0.0"
+    "react-scripts": "^1.1.5",
+    "styled-components": "^4.4.1"
   },
   "eslintConfig": {
     "extends": "react-app"
