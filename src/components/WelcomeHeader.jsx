@@ -6,7 +6,7 @@ import styled from "styled-components";
 const Title = styled(Header1)``;
 const Subtitle = styled(Header2)``;
 
-export const Header = () => {
+export const WelcomeHeader = () => {
   return (
     <>
       <Title>Welcome to Voice Description!</Title>
