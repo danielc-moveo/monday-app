@@ -14,14 +14,16 @@ const ActionText = styled(Header3)`
   color: ${Colors.grey};
 `;
 
-export const StartRecording = ({ startRecord }) => {
+export const StartRecording = ({ startRecord, hasHistory }) => {
   return (
     <>
       <IconBtn onClick={startRecord}>
         <MicIcon />
       </IconBtn>
 
-      <ActionText>Start recording now</ActionText>
+      <ActionText>{`${
+        hasHistory ? "Record new Voice Description" : "Start recording now"
+      } `}</ActionText>
     </>
   );
 };

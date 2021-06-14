@@ -10,7 +10,7 @@ const Subtitle = styled(Header2)`
   color: ${Colors.black};
 `;
 
-export const Header = () => {
+export const WelcomeHeader = () => {
   return (
     <>
       <Title>Welcome to Voice Description!</Title>
