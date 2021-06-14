@@ -5,7 +5,7 @@ import "monday-ui-react-core/dist/main.css";
 //Explore more Monday React Components here: https://style.monday.com/
 // import AttentionBox from "monday-ui-react-core/dist/AttentionBox.js";
 import AppSolution from "./AppSolution";
-
+import { mondayInstance } from "./api/monday";
 // const monday = mondaySdk();
 
 class App extends React.Component {
@@ -31,7 +31,7 @@ class App extends React.Component {
           text="Let's start building your amazing app, which will change the world!"
           type="success"
         /> */}
-        <AppSolution />
+        <AppSolution mondayInstance={mondayInstance} />
       </div>
     );
   }
