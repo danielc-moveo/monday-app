@@ -9,7 +9,6 @@ export const sendVoiceMessage = async (params) => {
     voiceMessageTitle,
   } = params;
   const fileName = `voice_description_${messageNumber}`;
-
   try {
     const file = _blobToFile(blob, fileName);
     const newUpdateId = await _createUpdate(
@@ -50,6 +49,7 @@ const _createUpdate = async (
         }
         }`;
   const response = await mondayInstance.api(query);
+
   const { id } = response.data.create_update;
   return id;
 };
@@ -57,11 +57,9 @@ const _createUpdate = async (
 const _addFileToUpdate = async (newUpdateId, file) => {
   const formData = new FormData();
   formData.append("variables[file]", file, file.name);
-
   const noVariableQuery = `mutation addFile($file: File!) {add_file_to_update (update_id: ${newUpdateId}, file: $file) {id}}`;
   formData.append("query", noVariableQuery);
-
-  await axios.post(process.env.REACT_APP_BASE_URL, formData);
+  const res = await axios.post(process.env.REACT_APP_BASE_URL, formData);
 };
 
 const _createColumn = async (mondayInstance, boardId, columnName) => {

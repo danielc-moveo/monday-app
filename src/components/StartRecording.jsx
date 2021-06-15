@@ -11,7 +11,7 @@ import styled from "styled-components";
 import { ReactComponent as MicIcon } from "../ui/icons/Mic.svg";
 
 const ActionText = styled(Header3)`
-  color: ${Colors.grey};
+  color: ${Colors.darkGrey};
 `;
 
 export const StartRecording = ({ startRecord, hasHistory }) => {
