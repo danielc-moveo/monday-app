@@ -5,8 +5,13 @@ import Timer from "react-compound-timer";
 const TimerContainer = styled.div`
   display: flex;
   align-items: center;
+  color: ${({ theme }) => theme.timerColor};
+
 `;
 
+const TimerField = styled.div`
+  color: ${({ theme }) => theme.color};
+`;
 export const Timers = ({ blobDuration, handleTimeout, isRecording }) => (
   <TimerContainer>
     {blobDuration > 0 && (
@@ -22,7 +27,7 @@ export const Timers = ({ blobDuration, handleTimeout, isRecording }) => (
         ]}
       >
         {({ start, pause, stop, reset }) => (
-          <React.Fragment>
+          <TimerField>
             <Timer.Minutes />:
             <Timer.Seconds
               formatValue={(value) => `${value < 10 ? `0${value}` : value} / `}
@@ -47,7 +52,7 @@ export const Timers = ({ blobDuration, handleTimeout, isRecording }) => (
               id="leftTimerBtnStop"
               onClick={stop}
             ></button>
-          </React.Fragment>
+          </TimerField>
         )}
       </Timer>
     )}

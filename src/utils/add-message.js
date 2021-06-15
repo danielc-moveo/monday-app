@@ -59,30 +59,5 @@ const _addFileToUpdate = async (newUpdateId, file) => {
   formData.append("variables[file]", file, file.name);
   const noVariableQuery = `mutation addFile($file: File!) {add_file_to_update (update_id: ${newUpdateId}, file: $file) {id}}`;
   formData.append("query", noVariableQuery);
-  const res = await axios.post(process.env.REACT_APP_BASE_URL, formData);
-};
-
-const _createColumn = async (mondayInstance, boardId, columnName) => {
-  const query = `mutation {
-        create_column (board_id: ${boardId}, title: ${columnName}, column_type: file) {
-        id
-        }
-        }`;
-  const response = await mondayInstance.api(query);
-  const { id } = response.data.create_column;
-  return id;
-};
-
-const _addFileToColumn = async (itemId, newColumnId, file) => {
-  const formData = new FormData();
-  formData.append("variables[file]", file, file.name);
-
-  const noVariableQuery = `mutation addFile($file: File!) {  add_file_to_column (item_id: ${itemId}, column_id: ${newColumnId},file: $file) {id}}`;
-  formData.append("query", noVariableQuery);
-
-  try {
-    const res = await axios.post(process.env.REACT_APP_BASE_URL, formData);
-  } catch (error) {
-    //internal 500 server error
-  }
+  await axios.post(process.env.REACT_APP_BASE_URL, formData);
 };

@@ -21,7 +21,6 @@ export const FeatureWrapper = styled.div`
 `;
 
 const Container = styled(FlexedColCenter)`
-  background: ${({ theme }) => theme.background};
   text-align: center;
   margin: ${({ hasHistory }) => (hasHistory ? "0" : "49px 0 32px 0")};
   height: ${({ hasHistory }) => hasHistory && "250px"};
@@ -38,7 +37,7 @@ const Wrapper = styled(FlexedColCenter)`
 const NotificationBox = styled.div`
   margin: 40px auto 0 auto;
 
-   ol {
+  ol {
     margin-top: 60px;
   }
 `;
@@ -114,6 +113,16 @@ const FeatureManager = ({ mondayInstance }) => {
     };
     fetchData();
   }, [mondayInstance]);
+
+  useEffect(() => {
+    mondayInstance.listen(["context"], (res) => {
+      const themeResponse = res.data.theme;
+      const hasThemeChanged = themeResponse === theme;
+      if (!hasThemeChanged) {
+        setTheme(themeResponse);
+      }
+    });
+  }, [mondayInstance, theme]);
 
   useEffect(() => {
     const fetchData = async () => {
