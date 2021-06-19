@@ -3,10 +3,10 @@ import { Colors } from "../ui/Colors";
 import styled from "styled-components";
 
 const TitleInput = styled.input`
-  margin-top: 20px;
+  margin-top: 24px;
   padding: 8px;
   border-radius: 5px;
-  width: 65%;
+  width: 340px;
   border-color: ${Colors.blue};
   height: 20px;
 
@@ -16,10 +16,10 @@ const TitleInput = styled.input`
   }
 `;
 const AddBtn = styled.button`
-  margin-top: 40px;
+  margin-top: 48px;
   color: ${Colors.white};
   border-radius: 5px;
-  width: 70%;
+  width: 360px;
   height: 40px;
   background-color: ${Colors.blue};
   border: none;
@@ -38,13 +38,12 @@ export const RecordTitleInput = ({ handleAdd, blob }) => {
   return (
     <>
       <TitleInput
-        type={Text}
         placeholder={"Add your title for your voice description"}
         value={title}
         onChange={(e) => handleChange(e)}
       />
       <AddBtn disabled={!title} onClick={() => handleAdd(title, blob)}>
-        ADD
+        Add
       </AddBtn>
     </>
   );

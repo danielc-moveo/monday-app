@@ -1,114 +1,65 @@
 import React from "react";
-import { useState } from "react";
-import styled from "styled-components";
-import { Header3, IconBtn } from "../ui/Layouts";
-import { ReactComponent as TrashIcon } from "../ui/icons/TrashSmall.svg";
-import { ReactComponent as TimeIcon } from "../ui/icons/Time.svg";
-
+import { useState, useCallback } from "react";
 import Loader from "../ui/Loader";
+import styled from "styled-components";
+import Message from "./Message";
 
 const Container = styled.div`
   color: ${({ theme }) => theme.color};
   margin-bottom: 30px;
 `;
 
-const Box = styled.div`
-  margin-bottom: 10px;
-  padding: 20px;
-  border-bottom: ${({ theme }) => `1px solid ${theme.borderBottom}`};
-`;
-
-const BoxHeader = styled.div`
-  display: flex;
-  margin-bottom: 27px;
-  align-items: center;
-  & img {
-    margin-right: 10px;
-    border-radius: 50%;
-    height: 30px;
-    width: 30px;
-  }
-
-  .vertical-center {
-    /* line-height: 30px; */
-  }
-
-  & .creator {
-    text-transform: capitalize;
-  }
-
-  & .time-icon {
-    margin-right: 5px;
-    width: 30px;
-    height: 30px;
-    pointer-events: none;
-  }
-
-  & .time {
-    margin-right: 10px;
-  }
-
-  & .trash-icon {
-    svg {
-      width: 30px;
-      height: 30px;
-    }
-  }
-`;
-
-const Title = styled.div`
-  text-transform: capitalize;
-  margin-bottom: 19px;
-`;
-
-const HourAndIconsContainer = styled.div`
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-`;
-
-const Text = styled(Header3)``;
-
 const MessagesHistory = ({
   messagesHistory,
   handleDeleteVmFromDb,
   isDeleting,
+  userId,
+  mondayUserInstance,
 }) => {
   const [currentUpdateId, setCurrentupdateId] = useState(null);
+
+  const formatTime = useCallback((time) => {
+    var today = new Date();
+    var createTime = new Date(time);
+    var diffMs = today - createTime; // milliseconds between now & createTime
+    var diffDays = Math.floor(diffMs / 86400000); // days
+    var diffHrs = Math.floor((diffMs % 86400000) / 3600000); // hours
+    var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
+
+    if (diffDays === 0) {
+      if (diffHrs === 0) {
+        if (diffMins < 5) return "just now";
+        else return `${diffMins}m`;
+      } else return `${diffHrs}h`;
+    } else if (diffDays < 30) {
+      return `${diffDays}d`;
+    }
+
+    const partialDate = createTime.toDateString().split(" ");
+    return `${partialDate[1]} ${partialDate[2]}`;
+  }, []);
 
   return (
     <Container>
       {messagesHistory.map(
-        ({ id: updateId, assets, creator, body, created_at }, i) =>
-          isDeleting && currentUpdateId === updateId ? (
+        ({ id: updateId, assets, body, created_at, creator }, i) => {
+          return isDeleting && currentUpdateId === updateId ? (
             <Loader />
           ) : (
-            <Box key={i}>
-              <BoxHeader>
-                <img src={creator.photo_tiny} alt="" />
-                <Text className="creator">{creator.name}</Text>
-                <HourAndIconsContainer>
-                  <IconBtn className="time-icon ">
-                    <TimeIcon />
-                  </IconBtn>
-                  <Text className="time ">{created_at}</Text>
-                  <IconBtn
-                    className="trash-icon"
-                    onClick={() => {
-                      setCurrentupdateId(updateId);
-                      handleDeleteVmFromDb(updateId);
-                    }}
-                  >
-                    <TrashIcon />
-                  </IconBtn>
-                </HourAndIconsContainer>
-              </BoxHeader>
-              <div>
-                <Title>{body}</Title>
-                <audio src={assets[0].public_url} controls />
-              </div>
-            </Box>
-          )
+            <Message
+              creator={creator}
+              setCurrentupdateId={setCurrentupdateId}
+              userId={userId}
+              created_at={created_at}
+              handleDeleteVmFromDb={handleDeleteVmFromDb}
+              formatTime={formatTime}
+              updateId={updateId}
+              assetSrc={assets[0].public_url}
+              mondayUserInstance={mondayUserInstance}
+              body={body}
+            />
+          );
+        }
       )}
     </Container>
   );

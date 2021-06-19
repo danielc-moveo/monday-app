@@ -3,8 +3,14 @@ import { Colors } from "../ui/Colors";
 import { Header1, Header2, Header3, FlexedColCenter } from "../ui/Layouts";
 import styled from "styled-components";
 
-const Title = styled(Header1)``;
-const Subtitle = styled(Header2)``;
+const Title = styled(Header1)`
+  font-weight: bold;
+`;
+
+const Subtitle = styled(Header2)`
+  margin-top: 0;
+  margin-bottom: 50px;
+`;
 
 export const WelcomeHeader = () => {
   return (

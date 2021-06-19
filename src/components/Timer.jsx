@@ -6,7 +6,7 @@ const TimerContainer = styled.div`
   display: flex;
   align-items: center;
   color: ${({ theme }) => theme.timerColor};
-
+  font-size: 20px;
 `;
 
 const TimerField = styled.div`

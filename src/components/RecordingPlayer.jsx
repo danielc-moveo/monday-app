@@ -4,19 +4,19 @@ import styled from "styled-components";
 import { IconBtn } from "../ui/Layouts";
 import { ReactComponent as TrashIcon } from "../ui/icons/Trash.svg";
 import { ReactComponent as RecordIcon } from "../ui/icons/Record.svg";
-import { ReactComponent as PlayIcon } from "../ui/icons/Play.svg";
-import { ReactComponent as PauseIcon } from "../ui/icons/Pause.svg";
 import { RecordTitleInput } from "./RecordTitleInput";
 import { PlayOrPause } from "./PlayOrPause";
 import useRecorder from "./useRecorder";
 import { StartRecording } from "./StartRecording";
 import getBlobDuration from "get-blob-duration";
 import { Timers } from "./Timer";
+import { ReactComponent as RedSign } from "../ui/icons/RedSign.svg";
+import { WelcomeHeader } from "./WelcomeHeader";
 
 const PlayerContainer = styled.div`
   background-color: ${Colors.lightGrey};
-  width: 70%;
-  height: 65px;
+  width: 360px;
+  height: 60px;
   border-radius: 50px;
   display: flex;
   justify-content: space-between;
@@ -27,7 +27,20 @@ const AudioContainer = styled.div`
 `;
 const StopBtn = styled(IconBtn)``;
 
-export const RecordingPlayer = ({ handleAdd }) => {
+const TrashBtn = styled(IconBtn)`
+  width: 50px;
+  height: 50px;
+`;
+
+const TimerWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  min-width: 70px;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+export const RecordingPlayer = ({ handleAdd, hasHistory }) => {
   const audioRef = useRef(null);
   const [blobDuration, setBlobDuration] = useState(0);
   const [isReplay, setIsReplay] = useState(false);
@@ -86,19 +99,20 @@ export const RecordingPlayer = ({ handleAdd }) => {
       <AudioContainer>
         <audio src={audioURL} controls ref={audioRef} type="audio/mp4" />
       </AudioContainer>
-
       {!isRecording && !blob ? (
-        <StartRecording startRecord={startRecord} />
+        <StartRecording startRecord={startRecord} hasHistory={hasHistory} />
       ) : (
         <PlayerContainer>
-          <IconBtn onClick={deleteRecord}>{blob && <TrashIcon />}</IconBtn>
-
+          <TrashBtn onClick={deleteRecord}>{blob && <TrashIcon />}</TrashBtn>
           {(blobDuration > 0 || isRecording) && (
-            <Timers
-              blobDuration={blobDuration}
-              isRecording={isRecording}
-              handleTimeout={handleTimeout}
-            />
+            <TimerWrapper>
+              {isRecording && <RedSign />}
+              <Timers
+                blobDuration={blobDuration}
+                isRecording={isRecording}
+                handleTimeout={handleTimeout}
+              />
+            </TimerWrapper>
           )}
 
           {isRecording ? (

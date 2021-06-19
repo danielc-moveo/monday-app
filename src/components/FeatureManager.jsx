@@ -2,16 +2,16 @@ import React, { useEffect, useState } from "react";
 import "../App.css";
 import { useCallback } from "react";
 import { RecordingPlayer } from "./RecordingPlayer";
-import { WelcomeHeader } from "./WelcomeHeader";
 import styled from "styled-components";
 import { FlexedColCenter } from "../ui/Layouts";
-import { sendVoiceMessage } from "../utils/add-message";
-import { getContext, getVoiceMessagesHistory } from "../utils/load-messages";
 import { ThemeProvider } from "styled-components";
 import { darkTheme, lightTheme } from "../ui/Theme";
 import MessagesHistory from "./MessagesHistory";
-import { deleteVmFromDb } from "../utils/delete-voice";
+import { deleteVmFromDb } from "../api/monday/utils/delete-voice";
 import Loader from "../ui/Loader";
+import { WelcomeHeader } from "./WelcomeHeader";
+import { sendVoiceMessage } from "../api/monday/utils/add-message";
+import { getContext, getVoiceMessagesHistory } from "../api/monday/utils/load-messages";
 
 export const FeatureWrapper = styled.div`
   display: flex;
@@ -30,9 +30,7 @@ const Container = styled(FlexedColCenter)`
   justify-content: center;
 `;
 
-const Wrapper = styled(FlexedColCenter)`
-  width: 40%;
-`;
+const Wrapper = styled(FlexedColCenter)``;
 
 const NotificationBox = styled.div`
   margin: 40px auto 0 auto;
@@ -45,7 +43,7 @@ const NotificationBox = styled.div`
 const Notification = styled.div`
   font-weight: bold;
 `;
-const FeatureManager = ({ mondayInstance }) => {
+const FeatureManager = ({ mondayUserInstance }) => {
   const [currentItemId, setCurrentItemId] = useState(null);
   const [messagesHistory, setMessagesHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,6 +51,7 @@ const FeatureManager = ({ mondayInstance }) => {
   const [hasNewVoiceMessage, setHasNewVoiceMessage] = useState(false);
   const [theme, setTheme] = useState("");
   const [notification, setNotification] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [error, setError] = useState(null);
 
   const handleAdd = useCallback(
@@ -61,11 +60,12 @@ const FeatureManager = ({ mondayInstance }) => {
       setIsLoading(true);
       const messageNumber = messagesHistory ? messagesHistory.length + 1 : 0;
       const params = {
-        mondayInstance,
+        mondayUserInstance,
         blob,
         currentItemId,
         messageNumber,
         voiceMessageTitle: title,
+        userId,
       };
       const response = await sendVoiceMessage(params);
       setIsLoading(false);
@@ -73,7 +73,7 @@ const FeatureManager = ({ mondayInstance }) => {
         setError(response.msg);
       }
     },
-    [currentItemId, mondayInstance, messagesHistory]
+    [currentItemId, mondayUserInstance, messagesHistory, userId]
   );
 
   useEffect(() => {
@@ -97,12 +97,16 @@ const FeatureManager = ({ mondayInstance }) => {
           }
         };
       });
+
+
     const fetchData = async () => {
-      const { itemIdResponse, theme } = await getContext(mondayInstance);
+      const { itemIdResponse, theme, id } = await getContext(mondayUserInstance);
+
       setTheme(theme);
+      setUserId(id);
       setCurrentItemId(itemIdResponse);
       const response = await getVoiceMessagesHistory(
-        mondayInstance,
+        mondayUserInstance,
         itemIdResponse
       );
       const { messagesHistory, msg } = response;
@@ -112,22 +116,22 @@ const FeatureManager = ({ mondayInstance }) => {
       setIsLoading(false);
     };
     fetchData();
-  }, [mondayInstance]);
+  }, [mondayUserInstance]);
 
   useEffect(() => {
-    mondayInstance.listen(["context"], (res) => {
+    mondayUserInstance.listen(["context"], (res) => {
       const themeResponse = res.data.theme;
       const hasThemeChanged = themeResponse === theme;
       if (!hasThemeChanged) {
         setTheme(themeResponse);
       }
     });
-  }, [mondayInstance, theme]);
+  }, [mondayUserInstance, theme]);
 
   useEffect(() => {
     const fetchData = async () => {
       const response = await getVoiceMessagesHistory(
-        mondayInstance,
+        mondayUserInstance,
         currentItemId
       );
       const { messagesHistory, msg } = response;
@@ -141,14 +145,14 @@ const FeatureManager = ({ mondayInstance }) => {
       fetchData();
       setHasNewVoiceMessage(false);
     }
-  }, [hasNewVoiceMessage, currentItemId, mondayInstance, isLoading]);
+  }, [hasNewVoiceMessage, currentItemId, mondayUserInstance, isLoading]);
 
   const themeMode = theme === "light" ? lightTheme : darkTheme;
 
   const handleDeleteVmFromDb = async (updateId) => {
     setIsDeleting(true);
     const { msg, deletedUpdateId } = await deleteVmFromDb(
-      mondayInstance,
+      mondayUserInstance,
       updateId
     );
     if (msg === "success") {
@@ -188,7 +192,10 @@ const FeatureManager = ({ mondayInstance }) => {
               <Container hasHistory={hasHistory}>
                 <Wrapper>
                   {!hasHistory && <WelcomeHeader />}
-                  <RecordingPlayer handleAdd={handleAdd} />
+                  <RecordingPlayer
+                    handleAdd={handleAdd}
+                    hasHistory={hasHistory}
+                  />
                 </Wrapper>
               </Container>
               {messagesHistory.length > 0 && (
@@ -196,6 +203,8 @@ const FeatureManager = ({ mondayInstance }) => {
                   isDeleting={isDeleting}
                   messagesHistory={messagesHistory}
                   handleDeleteVmFromDb={handleDeleteVmFromDb}
+                  userId={userId}
+                  mondayUserInstance={mondayUserInstance}
                 />
               )}
             </>

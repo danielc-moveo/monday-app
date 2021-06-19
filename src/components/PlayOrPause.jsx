@@ -1,5 +1,4 @@
 import React, { useCallback, useRef, useState } from "react";
-import styled from "styled-components";
 import { IconBtn } from "../ui/Layouts";
 import { ReactComponent as PlayIcon } from "../ui/icons/Play.svg";
 import { ReactComponent as PauseIcon } from "../ui/icons/Pause.svg";
