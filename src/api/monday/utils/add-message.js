@@ -1,31 +1,35 @@
-// import axios from "../../axios";
-import axios from "axios";
-import { mondayPrivateInstance, mondayUserInstance } from "..";
-
 export const sendVoiceMessage = async (params) => {
   const {
     mondayUserInstance,
     blob,
     currentItemId,
     messageNumber,
-    voiceMessageTitle,
+    title,
     userId,
   } = params;
   const fileName = `voice_description_${messageNumber}`;
   try {
     const file = _blobToFile(blob, fileName);
-    const newUpdateId = await _createUpdate(
+    const { id: newUpdateId, created_at } = await _createUpdate(
       mondayUserInstance,
       currentItemId,
-      voiceMessageTitle,
+      title,
       userId
     );
 
-    await _addFileToUpdate(mondayUserInstance, newUpdateId, file);
-    const creator = await getCreator(mondayUserInstance, userId);
-    await mondayUserInstance.storage.instance.setItem(newUpdateId, creator.id);
+    const processedFileUploadResponse = await _addFileToUpdate(
+      mondayUserInstance,
+      newUpdateId,
+      file
+    );
     return {
       msg: "success",
+      processedResponse: {
+        ...processedFileUploadResponse,
+        id: newUpdateId,
+        body: title,
+        created_at,
+      },
     };
   } catch (error) {
     return {
@@ -45,42 +49,39 @@ const _blobToFile = (theBlob, fileName) => {
   return newFile;
 };
 
-const _createUpdate = async (
-  mondayUserInstance,
-  currentItemId,
-  voiceMessageTitle,
-  userId
-) => {
-  const creator = await getCreator(mondayUserInstance, userId);
-  const { name } = creator;
+const _createUpdate = async (mondayUserInstance, currentItemId, title) => {
   const parsedVoiceMessageTitle =
-    voiceMessageTitle.charAt(0).toUpperCase() + voiceMessageTitle.slice(1);
+    title.charAt(0).toUpperCase() + title.slice(1);
 
-  const parsedName = name.charAt(0).toUpperCase() + name.slice(1);
-
-  // const bodyString = `${parsedVoiceMessageTitle}`;
-  const bodyString = `${parsedVoiceMessageTitle}`;
+  // const parsedName = name.charAt(0).toUpperCase() + name.slice(1);
+  const bodyString = `Voice message : ${parsedVoiceMessageTitle}`;
 
   const query = `mutation {
-    create_update (item_id: ${currentItemId}, body: ${bodyString} ) {
-    id
+    create_update (item_id: ${currentItemId}, body: "${bodyString}" ) {
+    id,
+    created_at
     }
     }`;
   const response = await mondayUserInstance.api(query);
-  const { id } = response.data.create_update;
-  return id;
+  const { id, created_at } = response.data.create_update;
+  return { id, created_at };
 };
 
 const _addFileToUpdate = async (mondayUserInstance, newUpdateId, myfile) => {
   try {
-    await mondayUserInstance.api(
+    const addFileResponse = await mondayUserInstance.api(
       `
   mutation addFileToUpdate($file: File!) {
     add_file_to_update(
       update_id: ${newUpdateId},
       file: $file
     ) {
-      id
+      public_url,
+      uploaded_by {
+        id,
+        name,
+        photo_tiny
+      }
     }
   }
 `,
@@ -88,16 +89,19 @@ const _addFileToUpdate = async (mondayUserInstance, newUpdateId, myfile) => {
         variables: { file: myfile },
       }
     );
-    debugger;
+    const processedFileUploadResponse = {
+      assets: [
+        { public_url: addFileResponse.data.add_file_to_update.public_url },
+      ],
+      creator: {
+        id: addFileResponse.data.add_file_to_update.uploaded_by.id,
+        name: addFileResponse.data.add_file_to_update.uploaded_by.name,
+        photo_tiny:
+          addFileResponse.data.add_file_to_update.uploaded_by.photo_tiny,
+      },
+    };
+    return processedFileUploadResponse;
   } catch (error) {
     debugger;
   }
-};
-
-const getCreator = async (mondayUserInstance, userId) => {
-  const query = ` query { users ( ids : ${userId} ) { name, id, photo_tiny }
-           }`;
-
-  const response = await mondayUserInstance.api(query);
-  return response.data.users[0];
 };

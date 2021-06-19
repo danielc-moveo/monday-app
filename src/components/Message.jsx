@@ -1,16 +1,17 @@
-import React from "react";
-import { Header3, IconBtn } from "../ui/Layouts";
-import { ReactComponent as TrashIcon } from "../ui/icons/TrashSmall.svg";
-import { ReactComponent as TimeIcon } from "../ui/icons/Time.svg";
-import styled from "styled-components";
-import { useState } from "react";
-import { useEffect } from "react";
-import { getCreator } from "../api/monday/utils/load-messages";
+import React from 'react';
+import { Header3, IconBtn } from '../ui/Layouts';
+import { ReactComponent as TrashIcon } from '../ui/icons/TrashSmall.svg';
+import { ReactComponent as TimeIcon } from '../ui/icons/Time.svg';
+import styled from 'styled-components';
+import Loader from 'monday-ui-react-core/dist/Loader';
+import { useState } from 'react';
 
 const Box = styled.div`
   margin-bottom: 10px;
   padding: 20px;
   border-bottom: ${({ theme }) => `1px solid ${theme.borderBottom}`};
+  max-height:213px;
+  min-height:213px;
 `;
 
 const BoxHeader = styled.div`
@@ -40,8 +41,8 @@ const BoxHeader = styled.div`
   }
 
   & .trash-icon {
-    pointer-events: ${({ isDeleteAllowed }) => !isDeleteAllowed && "none"};
-    opacity: ${({ isDeleteAllowed }) => !isDeleteAllowed && "20%"};
+    pointer-events: ${({ isDeleteAllowed }) => !isDeleteAllowed && 'none'};
+    opacity: ${({ isDeleteAllowed }) => !isDeleteAllowed && '20%'};
     svg {
       width: 30px;
       height: 30px;
@@ -63,7 +64,7 @@ const HourAndIconsContainer = styled.div`
 const Text = styled(Header3)``;
 
 const Message = ({
-  mondayUserInstance,
+  currentUpdateId,
   setCurrentupdateId,
   userId,
   created_at,
@@ -71,50 +72,45 @@ const Message = ({
   formatTime,
   updateId,
   assetSrc,
+  creator,
   body,
-}) => {  
-  const [owner, setOwner] = useState(null);
-  useEffect(() => {
-    const fetchData = async () => {
-      if (mondayUserInstance) {
-        const ownerByUpdateIdResponse =
-          await mondayUserInstance.storage.instance.getItem(updateId);
-        const ownerFields = await getCreator(
-          mondayUserInstance,
-          ownerByUpdateIdResponse.data.value
-        );
-        setOwner({ ...ownerFields });
-      }
-    };
-    fetchData();
-  }, [mondayUserInstance, updateId]);
+}) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    setCurrentupdateId(updateId);
+    await handleDeleteVmFromDb(updateId);
+    setIsDeleting(false);
+  };
+  const isLoading = isDeleting && currentUpdateId === updateId;
   return (
     <>
-      {owner && (
+      {assetSrc && (
         <Box>
-          <BoxHeader isDeleteAllowed={owner.id.toString() === userId}>
-            <img src={owner.photo_tiny} alt="" />
-            <Text className="creator">{owner.name}</Text>
-            <HourAndIconsContainer>
-              <IconBtn className="time-icon ">
-                <TimeIcon />
-              </IconBtn>
-              <Text className="time ">{formatTime(created_at)}</Text>
-              <IconBtn
-                className="trash-icon"
-                onClick={() => {
-                  setCurrentupdateId(updateId);
-                  handleDeleteVmFromDb(updateId);
-                }}
-              >
-                <TrashIcon />
-              </IconBtn>
-            </HourAndIconsContainer>
-          </BoxHeader>
-          <div>
-            <Title>{body}</Title>
-            <audio src={assetSrc} controls />
-          </div>
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <>
+              <BoxHeader isDeleteAllowed={creator.id.toString() === userId}>
+                <img src={creator.photo_tiny} alt="" />
+                <Text className="creator">{creator.name}</Text>
+                <HourAndIconsContainer>
+                  <IconBtn className="time-icon ">
+                    <TimeIcon />
+                  </IconBtn>
+                  <Text className="time ">{formatTime(created_at)}</Text>
+                  <IconBtn className="trash-icon" onClick={handleDelete}>
+                    <TrashIcon />
+                  </IconBtn>
+                </HourAndIconsContainer>
+              </BoxHeader>
+              <div>
+                <Title>{body}</Title>
+                <audio src={assetSrc} controls />
+              </div>
+            </>
+          )}
         </Box>
       )}
     </>

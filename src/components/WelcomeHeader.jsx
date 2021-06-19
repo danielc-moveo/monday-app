@@ -1,7 +1,6 @@
-import React from "react";
-import { Colors } from "../ui/Colors";
-import { Header1, Header2, Header3, FlexedColCenter } from "../ui/Layouts";
-import styled from "styled-components";
+import React from 'react';
+import { Header1, Header2 } from '../ui/Layouts';
+import styled from 'styled-components';
 
 const Title = styled(Header1)`
   font-weight: bold;

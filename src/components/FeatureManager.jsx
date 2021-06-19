@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from "react";
-import "../App.css";
-import { useCallback } from "react";
-import { RecordingPlayer } from "./RecordingPlayer";
-import styled from "styled-components";
-import { FlexedColCenter } from "../ui/Layouts";
-import { ThemeProvider } from "styled-components";
-import { darkTheme, lightTheme } from "../ui/Theme";
-import MessagesHistory from "./MessagesHistory";
-import { deleteVmFromDb } from "../api/monday/utils/delete-voice";
-import Loader from "../ui/Loader";
-import { WelcomeHeader } from "./WelcomeHeader";
-import { sendVoiceMessage } from "../api/monday/utils/add-message";
-import { getContext, getVoiceMessagesHistory } from "../api/monday/utils/load-messages";
+import React, { useEffect, useState } from 'react';
+import '../App.css';
+import { useCallback } from 'react';
+import { RecordingPlayer } from './RecordingPlayer';
+import styled from 'styled-components';
+import { FlexedColCenter } from '../ui/Layouts';
+import { ThemeProvider } from 'styled-components';
+import { darkTheme, lightTheme } from '../ui/Theme';
+import MessagesHistory from './MessagesHistory';
+import Loader from '../ui/Loader';
+import { WelcomeHeader } from './WelcomeHeader';
+import { sendVoiceMessage } from '../api/monday/utils/add-message';
+import { getContext, getVoiceMessagesHistory } from '../api/monday/utils/load-messages';
+import MicrophoneAlert from './MicrophoneAlert';
+import useMicrophonePermission from './hooks/useMicrophonePermission';
 
 export const FeatureWrapper = styled.div`
   display: flex;
@@ -22,41 +23,27 @@ export const FeatureWrapper = styled.div`
 
 const Container = styled(FlexedColCenter)`
   text-align: center;
-  margin: ${({ hasHistory }) => (hasHistory ? "0" : "49px 0 32px 0")};
-  height: ${({ hasHistory }) => hasHistory && "250px"};
-  border-bottom: ${({ hasHistory, theme }) =>
-    hasHistory && `1px solid ${theme.borderBottom} `};
+  margin: ${({ hasHistory }) => (hasHistory ? '0' : '49px 0 32px 0')};
+  min-height: ${({ hasHistory }) => hasHistory && '250px'};
+  border-bottom: ${({ hasHistory, theme }) => hasHistory && `1px solid ${theme.borderBottom} `};
   width: 100%;
   justify-content: center;
 `;
 
 const Wrapper = styled(FlexedColCenter)``;
 
-const NotificationBox = styled.div`
-  margin: 40px auto 0 auto;
-
-  ol {
-    margin-top: 60px;
-  }
-`;
-
-const Notification = styled.div`
-  font-weight: bold;
-`;
 const FeatureManager = ({ mondayUserInstance }) => {
   const [currentItemId, setCurrentItemId] = useState(null);
   const [messagesHistory, setMessagesHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [hasNewVoiceMessage, setHasNewVoiceMessage] = useState(false);
-  const [theme, setTheme] = useState("");
-  const [notification, setNotification] = useState(null);
+  const [isMessagesFetched, setIsMessagesFetched] = useState(false);
+  const [theme, setTheme] = useState('');
   const [userId, setUserId] = useState(null);
   const [error, setError] = useState(null);
+  const notification = useMicrophonePermission();
 
   const handleAdd = useCallback(
     async (title, blob) => {
-      setHasNewVoiceMessage(true);
       setIsLoading(true);
       const messageNumber = messagesHistory ? messagesHistory.length + 1 : 0;
       const params = {
@@ -64,62 +51,39 @@ const FeatureManager = ({ mondayUserInstance }) => {
         blob,
         currentItemId,
         messageNumber,
-        voiceMessageTitle: title,
+        title,
         userId,
       };
-      const response = await sendVoiceMessage(params);
-      setIsLoading(false);
-      if (response.msg !== "success") {
-        setError(response.msg);
+      const { msg, processedResponse } = await sendVoiceMessage(params);
+      if (msg === 'success' && processedResponse) {
+        setMessagesHistory((prev) => [{ ...processedResponse }, ...prev]);
+        setIsLoading(false);
+      } else {
+        setError(msg);
       }
     },
     [currentItemId, mondayUserInstance, messagesHistory, userId]
   );
 
   useEffect(() => {
-    navigator.permissions
-      .query({ name: "microphone" })
-      .then(function (permissionStatus) {
-        if (permissionStatus.state === "denied") {
-          setNotification(
-            "Please allow microphone access in order to use this feature"
-          );
-        }
-
-        permissionStatus.onchange = function () {
-          console.log("Permission changed to " + this.state);
-          if (permissionStatus.state === "denied") {
-            setNotification(
-              "Please allow microphone access in order to use this feature"
-            );
-          } else {
-            setNotification(null);
-          }
-        };
-      });
-
-
     const fetchData = async () => {
       const { itemIdResponse, theme, id } = await getContext(mondayUserInstance);
-
       setTheme(theme);
       setUserId(id);
       setCurrentItemId(itemIdResponse);
-      const response = await getVoiceMessagesHistory(
-        mondayUserInstance,
-        itemIdResponse
-      );
+      const response = await getVoiceMessagesHistory(mondayUserInstance, itemIdResponse);
       const { messagesHistory, msg } = response;
-      if (msg === "success" && messagesHistory) {
+      if (msg === 'success' && messagesHistory) {
         setMessagesHistory([...messagesHistory]);
       }
       setIsLoading(false);
+      setIsMessagesFetched(true);
     };
     fetchData();
   }, [mondayUserInstance]);
 
   useEffect(() => {
-    mondayUserInstance.listen(["context"], (res) => {
+    mondayUserInstance.listen(['context'], (res) => {
       const themeResponse = res.data.theme;
       const hasThemeChanged = themeResponse === theme;
       if (!hasThemeChanged) {
@@ -128,84 +92,36 @@ const FeatureManager = ({ mondayUserInstance }) => {
     });
   }, [mondayUserInstance, theme]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await getVoiceMessagesHistory(
-        mondayUserInstance,
-        currentItemId
-      );
-      const { messagesHistory, msg } = response;
-      if (msg === "success" && messagesHistory) {
-        setMessagesHistory([...messagesHistory]);
-      }
-      setIsLoading(false);
-    };
-    const shouldReoadMessages = hasNewVoiceMessage && isLoading === false;
-    if (shouldReoadMessages) {
-      fetchData();
-      setHasNewVoiceMessage(false);
-    }
-  }, [hasNewVoiceMessage, currentItemId, mondayUserInstance, isLoading]);
-
-  const themeMode = theme === "light" ? lightTheme : darkTheme;
-
-  const handleDeleteVmFromDb = async (updateId) => {
-    setIsDeleting(true);
-    const { msg, deletedUpdateId } = await deleteVmFromDb(
-      mondayUserInstance,
-      updateId
-    );
-    if (msg === "success") {
-      setMessagesHistory((prev) => {
-        let newMessagesHistory = [...prev];
-        newMessagesHistory = messagesHistory.filter(
-          (message) => message.id !== deletedUpdateId
-        );
-        return newMessagesHistory;
-      });
-    }
-    setIsDeleting(false);
-  };
+  const themeMode = theme === 'light' ? lightTheme : darkTheme;
 
   const hasHistory = messagesHistory.length > 0;
   return (
     <ThemeProvider theme={themeMode}>
-      {isLoading ? (
+      {!isMessagesFetched ? (
         <Loader />
       ) : (
         <FeatureWrapper>
           {notification ? (
-            <NotificationBox>
-              <Notification>{notification.toUpperCase()}</Notification>
-              <ol>
-                <li> Open Chrome.</li>
-                <li> At the top right, click More.</li>
-                <li> Settings.</li>
-                <li> Under "Privacy and security," click Site settings.</li>
-                <li> Click Microphone.</li>
-                <li> Turn on or off Ask before accessing.</li>
-                <li> Refresh the page</li>
-              </ol>
-            </NotificationBox>
+            <MicrophoneAlert notification={notification} />
           ) : (
             <>
               <Container hasHistory={hasHistory}>
                 <Wrapper>
                   {!hasHistory && <WelcomeHeader />}
-                  <RecordingPlayer
-                    handleAdd={handleAdd}
-                    hasHistory={hasHistory}
-                  />
+                  <RecordingPlayer handleAdd={handleAdd} hasHistory={hasHistory} />
                 </Wrapper>
               </Container>
-              {messagesHistory.length > 0 && (
-                <MessagesHistory
-                  isDeleting={isDeleting}
-                  messagesHistory={messagesHistory}
-                  handleDeleteVmFromDb={handleDeleteVmFromDb}
-                  userId={userId}
-                  mondayUserInstance={mondayUserInstance}
-                />
+              {isLoading ? (
+                <Loader />
+              ) : (
+                messagesHistory.length > 0 && (
+                  <MessagesHistory
+                    mondayUserInstance={mondayUserInstance}
+                    messagesHistory={messagesHistory}
+                    setMessagesHistory={setMessagesHistory}
+                    userId={userId}
+                  />
+                )
               )}
             </>
           )}

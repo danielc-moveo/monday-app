@@ -11,7 +11,6 @@ import { StartRecording } from "./StartRecording";
 import getBlobDuration from "get-blob-duration";
 import { Timers } from "./Timer";
 import { ReactComponent as RedSign } from "../ui/icons/RedSign.svg";
-import { WelcomeHeader } from "./WelcomeHeader";
 
 const PlayerContainer = styled.div`
   background-color: ${Colors.lightGrey};

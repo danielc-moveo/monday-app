@@ -1,14 +1,8 @@
-import React from "react";
-import { Colors } from "../ui/Colors";
-import {
-  Header1,
-  Header2,
-  Header3,
-  FlexedColCenter,
-  IconBtn,
-} from "../ui/Layouts";
-import styled from "styled-components";
-import { ReactComponent as MicIcon } from "../ui/icons/Mic.svg";
+import React from 'react';
+import { Colors } from '../ui/Colors';
+import { Header3, IconBtn } from '../ui/Layouts';
+import styled from 'styled-components';
+import { ReactComponent as MicIcon } from '../ui/icons/Mic.svg';
 
 const ActionText = styled(Header3)`
   color: ${Colors.darkGrey};
@@ -21,9 +15,7 @@ export const StartRecording = ({ startRecord, hasHistory }) => {
         <MicIcon />
       </IconBtn>
 
-      <ActionText>{`${
-        hasHistory ? "Record new Voice Description" : "Start recording now"
-      } `}</ActionText>
+      <ActionText>{`${hasHistory ? 'Record new Voice Description' : 'Start recording now'} `}</ActionText>
     </>
   );
 };
