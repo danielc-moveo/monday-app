@@ -39,7 +39,7 @@ const TimerWrapper = styled.div`
   align-items: center;
 `;
 
-export const RecordingPlayer = ({ handleAdd, hasHistory }) => {
+export const RecordingPlayer = ({ sendMessage, hasHistory }) => {
   const audioRef = useRef(null);
   const [blobDuration, setBlobDuration] = useState(0);
   const [isReplay, setIsReplay] = useState(false);
@@ -53,6 +53,11 @@ export const RecordingPlayer = ({ handleAdd, hasHistory }) => {
     setBlob,
     setAudioURL,
   ] = useRecorder();
+
+const handleAdd = async(title, blob)=>{
+  await sendMessage(title, blob);
+  deleteRecord()
+}
 
   const startRecord = () => {
     startRecording();

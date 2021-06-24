@@ -32,6 +32,11 @@ const Container = styled(FlexedColCenter)`
 
 const Wrapper = styled(FlexedColCenter)``;
 
+const LoaderContainer = styled.div`
+  position: absolute;
+  top: 112px;
+`;
+
 const FeatureManager = ({ mondayUserInstance }) => {
   const [currentItemId, setCurrentItemId] = useState(null);
   const [messagesHistory, setMessagesHistory] = useState([]);
@@ -42,7 +47,7 @@ const FeatureManager = ({ mondayUserInstance }) => {
   const [error, setError] = useState(null);
   const notification = useMicrophonePermission();
 
-  const handleAdd = useCallback(
+  const sendMessage = useCallback(
     async (title, blob) => {
       setIsLoading(true);
       const messageNumber = messagesHistory ? messagesHistory.length + 1 : 0;
@@ -56,6 +61,11 @@ const FeatureManager = ({ mondayUserInstance }) => {
       };
       const { msg, processedResponse } = await sendVoiceMessage(params);
       if (msg === 'success' && processedResponse) {
+        mondayUserInstance.execute("notice", { 
+          message: "Voice Message Uploaded Successfully",
+          type: "success", // or "error" (red), or "info" (blue)
+          timeout: 6000,
+       });
         setMessagesHistory((prev) => [{ ...processedResponse }, ...prev]);
         setIsLoading(false);
       } else {
@@ -108,20 +118,22 @@ const FeatureManager = ({ mondayUserInstance }) => {
               <Container hasHistory={hasHistory}>
                 <Wrapper>
                   {!hasHistory && <WelcomeHeader />}
-                  <RecordingPlayer handleAdd={handleAdd} hasHistory={hasHistory} />
+                  <RecordingPlayer sendMessage={sendMessage} hasHistory={hasHistory} />
                 </Wrapper>
+                {isLoading && (
+                  <LoaderContainer>
+                    <Loader />
+                  </LoaderContainer>
+                )}
               </Container>
-              {isLoading ? (
-                <Loader />
-              ) : (
-                messagesHistory.length > 0 && (
-                  <MessagesHistory
-                    mondayUserInstance={mondayUserInstance}
-                    messagesHistory={messagesHistory}
-                    setMessagesHistory={setMessagesHistory}
-                    userId={userId}
-                  />
-                )
+
+              {messagesHistory.length > 0 && (
+                <MessagesHistory
+                  mondayUserInstance={mondayUserInstance}
+                  messagesHistory={messagesHistory}
+                  setMessagesHistory={setMessagesHistory}
+                  userId={userId}
+                />
               )}
             </>
           )}
