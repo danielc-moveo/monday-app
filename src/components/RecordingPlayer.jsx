@@ -1,18 +1,17 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Colors } from "../ui/Colors";
-import styled from "styled-components";
-import { IconBtn, Header1 } from "../ui/Layouts";
-import { ReactComponent as TrashIcon } from "../ui/icons/Trash.svg";
-import { ReactComponent as RecordIcon } from "../ui/icons/Record.svg";
-import { RecordTitleInput } from "./RecordTitleInput";
-import { PlayOrPause } from "./PlayOrPause";
-import useRecorder from "./useRecorder";
-import { StartRecording } from "./StartRecording";
-import getBlobDuration from "get-blob-duration";
-import { Timers } from "./Timer";
-import { ReactComponent as RedSign } from "../ui/icons/RedSign.svg";
-import { WelcomeHeader } from "./WelcomeHeader";
-import useMicrophonePermission from "./hooks/useMicrophonePermission";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Colors } from '../ui/Colors';
+import styled from 'styled-components';
+import { IconBtn, Header1 } from '../ui/Layouts';
+import { ReactComponent as TrashIcon } from '../ui/icons/Trash.svg';
+import { ReactComponent as RecordIcon } from '../ui/icons/Record.svg';
+import { RecordTitleInput } from './RecordTitleInput';
+import { PlayOrPause } from './PlayOrPause';
+import useRecorder from './useRecorder';
+import { StartRecording } from './StartRecording';
+import getBlobDuration from 'get-blob-duration';
+import { Timers } from './Timer';
+import { ReactComponent as RedSign } from '../ui/icons/RedSign.svg';
+import { WelcomeHeader } from './WelcomeHeader';
 
 const PlayerContainer = styled.div`
   background-color: ${Colors.lightGrey};
@@ -59,17 +58,8 @@ export const RecordingPlayer = ({ sendMessage, hasHistory }) => {
   const audioRef = useRef(null);
   const [blobDuration, setBlobDuration] = useState(0);
   const [isReplay, setIsReplay] = useState(false);
-  const [isMicrophoneAllowed, AlertMessage] = useMicrophonePermission();
 
-  let [
-    audioURL,
-    isRecording,
-    startRecording,
-    stopRecording,
-    blob,
-    setBlob,
-    setAudioURL,
-  ] = useRecorder();
+  let [audioURL, isRecording, startRecording, stopRecording, blob, setBlob, setAudioURL] = useRecorder();
 
   const handleAdd = async (title, blob) => {
     await sendMessage(title, blob);
@@ -82,19 +72,19 @@ export const RecordingPlayer = ({ sendMessage, hasHistory }) => {
 
   const deleteRecord = () => {
     stopRecording();
-    setAudioURL("");
+    setAudioURL('');
     setBlobDuration(0);
     setBlob(null);
   };
 
   const play = useCallback(() => {
     audioRef.current.play();
-    document.getElementById("leftTimerBtnPlay").click();
+    document.getElementById('leftTimerBtnPlay').click();
   }, [audioRef]);
 
   const pause = useCallback(() => {
     audioRef.current.pause();
-    document.getElementById("leftTimerBtnPause").click();
+    document.getElementById('leftTimerBtnPause').click();
   }, [audioRef]);
 
   const stop = useCallback(() => {
@@ -102,8 +92,8 @@ export const RecordingPlayer = ({ sendMessage, hasHistory }) => {
   }, [stopRecording]);
 
   const handleTimeout = () => {
-    document.getElementById("leftTimerBtnReset").click();
-    document.getElementById("leftTimerBtnStop").click();
+    document.getElementById('leftTimerBtnReset').click();
+    document.getElementById('leftTimerBtnStop').click();
     setIsReplay(false);
   };
 
@@ -142,11 +132,7 @@ export const RecordingPlayer = ({ sendMessage, hasHistory }) => {
                   <RedSign />
                 </RedDotWrapper>
               )}
-              <Timers
-                blobDuration={blobDuration}
-                isRecording={isRecording}
-                handleTimeout={handleTimeout}
-              />
+              <Timers blobDuration={blobDuration} isRecording={isRecording} handleTimeout={handleTimeout} />
             </TimerWrapper>
           )}
 
@@ -155,19 +141,12 @@ export const RecordingPlayer = ({ sendMessage, hasHistory }) => {
               <RecordIcon />
             </StopBtn>
           ) : (
-            <PlayOrPause
-              play={play}
-              pause={pause}
-              isReplay={isReplay}
-              setIsReplay={setIsReplay}
-            />
+            <PlayOrPause play={play} pause={pause} isReplay={isReplay} setIsReplay={setIsReplay} />
           )}
         </PlayerContainer>
       )}
 
-      {!isRecording && blob ? (
-        <RecordTitleInput handleAdd={handleAdd} blob={blob} />
-      ) : null}
+      {!isRecording && blob ? <RecordTitleInput handleAdd={handleAdd} blob={blob} /> : null}
     </>
   );
 };

@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
-import useMicrophonePermission from "./hooks/useMicrophonePermission";
+import { useEffect, useState } from 'react';
 
 const useRecorder = () => {
-  const [audioURL, setAudioURL] = useState("");
+  const [audioURL, setAudioURL] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [recorder, setRecorder] = useState(null);
   const [blob, setBlob] = useState(null);
@@ -30,8 +29,8 @@ const useRecorder = () => {
       setAudioURL(blobAudioURL);
     };
 
-    recorder.addEventListener("dataavailable", handleData);
-    return () => recorder.removeEventListener("dataavailable", handleData);
+    recorder.addEventListener('dataavailable', handleData);
+    return () => recorder.removeEventListener('dataavailable', handleData);
   }, [recorder, isRecording]);
 
   const startRecording = () => {
@@ -41,21 +40,13 @@ const useRecorder = () => {
   const stopRecording = () => {
     setIsRecording(false);
   };
+
   async function requestRecorder() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    debugger;
     return new MediaRecorder(stream);
   }
 
-  return [
-    audioURL,
-    isRecording,
-    startRecording,
-    stopRecording,
-    blob,
-    setBlob,
-    setAudioURL,
-  ];
+  return [audioURL, isRecording, startRecording, stopRecording, blob, setBlob, setAudioURL];
 };
 
 export default useRecorder;

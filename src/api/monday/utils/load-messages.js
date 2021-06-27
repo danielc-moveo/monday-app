@@ -37,6 +37,7 @@ export const getVoiceMessagesHistory = async (mondayUserInstance, itemId) => {
   try {
     const updatesResponse = await mondayUserInstance.api(query);
     const updatesWithVoiceMemos = await getFilteredUpdates(updatesResponse);
+
     return { msg: 'success', messagesHistory: updatesWithVoiceMemos };
   } catch (error) {
     return { msg: error.message };
@@ -56,5 +57,5 @@ const getFilteredUpdates = async (updatesResponse) => {
 };
 
 const filterAssetsByAssetType = (assets) => {
-  return assets.filter(({ public_url }) => public_url.includes(`voice_description`)).length;
+  return assets.filter(({ public_url }) => public_url.includes(`voice_description_`)).length;
 };
