@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Colors } from "../ui/Colors";
 import styled from "styled-components";
-import { IconBtn } from "../ui/Layouts";
+import { IconBtn, Header1 } from "../ui/Layouts";
 import { ReactComponent as TrashIcon } from "../ui/icons/Trash.svg";
 import { ReactComponent as RecordIcon } from "../ui/icons/Record.svg";
 import { RecordTitleInput } from "./RecordTitleInput";
@@ -11,6 +11,8 @@ import { StartRecording } from "./StartRecording";
 import getBlobDuration from "get-blob-duration";
 import { Timers } from "./Timer";
 import { ReactComponent as RedSign } from "../ui/icons/RedSign.svg";
+import { WelcomeHeader } from "./WelcomeHeader";
+import useMicrophonePermission from "./hooks/useMicrophonePermission";
 
 const PlayerContainer = styled.div`
   background-color: ${Colors.lightGrey};
@@ -20,6 +22,11 @@ const PlayerContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+`;
+
+const Title = styled(Header1)`
+  font-weight: bold;
+  margin-bottom: 85px;
 `;
 const AudioContainer = styled.div`
   display: none;
@@ -38,11 +45,21 @@ const TimerWrapper = styled.div`
   justify-content: space-between;
   align-items: center;
 `;
+const RedDotWrapper = styled.div`
+  display: flex;
+  animation: fadeIn 1s infinite alternate;
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+  }
+`;
 
 export const RecordingPlayer = ({ sendMessage, hasHistory }) => {
   const audioRef = useRef(null);
   const [blobDuration, setBlobDuration] = useState(0);
   const [isReplay, setIsReplay] = useState(false);
+  const [isMicrophoneAllowed, AlertMessage] = useMicrophonePermission();
 
   let [
     audioURL,
@@ -54,10 +71,10 @@ export const RecordingPlayer = ({ sendMessage, hasHistory }) => {
     setAudioURL,
   ] = useRecorder();
 
-const handleAdd = async(title, blob)=>{
-  await sendMessage(title, blob);
-  deleteRecord()
-}
+  const handleAdd = async (title, blob) => {
+    await sendMessage(title, blob);
+    deleteRecord();
+  };
 
   const startRecord = () => {
     startRecording();
@@ -98,11 +115,21 @@ const handleAdd = async(title, blob)=>{
     if (blob && audioURL) fetchDuration();
   }, [blob, audioURL]);
 
+  const currentTitle = useCallback(() => {
+    if (!hasHistory) {
+      if (!blob) {
+        return !isRecording ? <WelcomeHeader /> : <Title>Recording...</Title>;
+      }
+      return <Title>Just one last step</Title>;
+    }
+  }, [blob, hasHistory, isRecording]);
+
   return (
     <>
       <AudioContainer>
         <audio src={audioURL} controls ref={audioRef} type="audio/mp4" />
       </AudioContainer>
+      {currentTitle()}
       {!isRecording && !blob ? (
         <StartRecording startRecord={startRecord} hasHistory={hasHistory} />
       ) : (
@@ -110,7 +137,11 @@ const handleAdd = async(title, blob)=>{
           <TrashBtn onClick={deleteRecord}>{blob && <TrashIcon />}</TrashBtn>
           {(blobDuration > 0 || isRecording) && (
             <TimerWrapper>
-              {isRecording && <RedSign />}
+              {isRecording && (
+                <RedDotWrapper>
+                  <RedSign />
+                </RedDotWrapper>
+              )}
               <Timers
                 blobDuration={blobDuration}
                 isRecording={isRecording}
