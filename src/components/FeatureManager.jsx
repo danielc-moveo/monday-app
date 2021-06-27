@@ -11,8 +11,8 @@ import Loader from '../ui/Loader';
 import { WelcomeHeader } from './WelcomeHeader';
 import { sendVoiceMessage } from '../api/monday/utils/add-message';
 import { getContext, getVoiceMessagesHistory } from '../api/monday/utils/load-messages';
-import MicrophoneAlert from './MicrophoneAlert';
 import useMicrophonePermission from './hooks/useMicrophonePermission';
+import { StartRecording } from './StartRecording';
 
 export const FeatureWrapper = styled.div`
   display: flex;
@@ -44,8 +44,7 @@ const FeatureManager = ({ mondayUserInstance }) => {
   const [isMessagesFetched, setIsMessagesFetched] = useState(false);
   const [theme, setTheme] = useState('');
   const [userId, setUserId] = useState(null);
-  const [error, setError] = useState(null);
-  const notification = useMicrophonePermission();
+  const [isMicrophoneAllowed, AlertMessage] = useMicrophonePermission();
 
   const sendMessage = useCallback(
     async (title, blob) => {
@@ -61,15 +60,13 @@ const FeatureManager = ({ mondayUserInstance }) => {
       };
       const { msg, processedResponse } = await sendVoiceMessage(params);
       if (msg === 'success' && processedResponse) {
-        mondayUserInstance.execute("notice", { 
-          message: "Voice Message Uploaded Successfully",
-          type: "success", // or "error" (red), or "info" (blue)
+        mondayUserInstance.execute('notice', {
+          message: 'Voice Message Uploaded Successfully',
+          type: 'success', // or "error" (red), or "info" (blue)
           timeout: 6000,
-       });
+        });
         setMessagesHistory((prev) => [{ ...processedResponse }, ...prev]);
         setIsLoading(false);
-      } else {
-        setError(msg);
       }
     },
     [currentItemId, mondayUserInstance, messagesHistory, userId]
@@ -83,11 +80,13 @@ const FeatureManager = ({ mondayUserInstance }) => {
       setCurrentItemId(itemIdResponse);
       const response = await getVoiceMessagesHistory(mondayUserInstance, itemIdResponse);
       const { messagesHistory, msg } = response;
+      debugger;
+
       if (msg === 'success' && messagesHistory) {
         setMessagesHistory([...messagesHistory]);
       }
-      setIsLoading(false);
       setIsMessagesFetched(true);
+      setIsLoading(false);
     };
     fetchData();
   }, [mondayUserInstance]);
@@ -111,8 +110,16 @@ const FeatureManager = ({ mondayUserInstance }) => {
         <Loader />
       ) : (
         <FeatureWrapper>
-          {notification ? (
-            <MicrophoneAlert notification={notification} />
+          {!isMicrophoneAllowed ? (
+            <Wrapper>
+              <WelcomeHeader />
+              <StartRecording
+                startRecord={() => undefined}
+                hasHistory={hasHistory}
+                isMicrophoneAllowed={isMicrophoneAllowed}
+              />
+              <AlertMessage />
+            </Wrapper>
           ) : (
             <>
               <Container hasHistory={hasHistory}>

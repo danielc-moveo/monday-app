@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 export const Header1 = styled.p`
   font-size: 22px;
   color: ${({ theme }) => theme.color};

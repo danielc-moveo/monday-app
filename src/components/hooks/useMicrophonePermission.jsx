@@ -1,25 +1,27 @@
 import { useEffect, useState } from 'react';
+import Alert from '../../ui/alert/Alert.svg';
+
+const AlertMessage = () => <img src={Alert} alt="" />;
 
 const useMicrophonePermission = () => {
-  const [notification, setNotification] = useState(null);
+  const [isMicrophoneAllowed, setIsMicrophoneAllowed] = useState(false);
 
   useEffect(() => {
     navigator.permissions.query({ name: 'microphone' }).then(function (permissionStatus) {
       if (permissionStatus.state === 'denied') {
-        setNotification('Please allow microphone access in order to use this feature');
+        setIsMicrophoneAllowed(false);
       }
 
       permissionStatus.onchange = function () {
         if (permissionStatus.state === 'denied') {
-          setNotification('Please allow microphone access in order to use this feature');
-        } else {
-          setNotification(null);
+          setIsMicrophoneAllowed(false);
         }
+        setIsMicrophoneAllowed(true);
       };
     });
   }, []);
 
-  return notification;
+  return [isMicrophoneAllowed, AlertMessage];
 };
 
 export default useMicrophonePermission;
