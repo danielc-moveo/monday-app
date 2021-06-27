@@ -10,14 +10,14 @@ const ActionText = styled(Header3)`
   color: ${Colors.darkGrey};
 `;
 const IconAndTextWrapper = styled.div`
-  position: absolute;
+  position: ${({ hasHistory }) => (hasHistory ? "absolute" : "static")};
   left: 0;
   right: 0;
   top: 15%;
 `;
 const Container = styled.div``;
 const AlertWrapper = styled.div`
-  position: relative;
+  position: ${({ hasHistory }) => (hasHistory ? "relative" : "static")};
   top: 80%;
 `;
 
@@ -43,8 +43,8 @@ export const StartRecording = ({ startRecord, hasHistory }) => {
 
   return (
     <Container>
-      <IconAndTextWrapper>
-        <IconBtn onClick={handleRecord}>
+      <IconAndTextWrapper hasHistory={hasHistory}>
+        <IconBtn onClick={handleRecord} disabled={micBlockAlert}>
           <MicIcon />
         </IconBtn>
 
@@ -52,7 +52,9 @@ export const StartRecording = ({ startRecord, hasHistory }) => {
           hasHistory ? "Record a new Voice Description" : "Start recording now"
         } `}</ActionText>
       </IconAndTextWrapper>
-      <AlertWrapper>{micBlockAlert && <AlertMessage />}</AlertWrapper>
+      <AlertWrapper hasHistory={hasHistory}>
+        {micBlockAlert && <AlertMessage />}
+      </AlertWrapper>
     </Container>
   );
 };
