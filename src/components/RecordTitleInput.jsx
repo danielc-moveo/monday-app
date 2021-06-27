@@ -7,7 +7,8 @@ const TitleInput = styled.input`
   padding: 8px;
   border-radius: 5px;
   width: 340px;
-  border-color: ${Colors.blue};
+  border-color: ${Colors.blue} !important;
+  border-style: solid;
   height: 20px;
 
   &:focus {
@@ -38,7 +39,7 @@ export const RecordTitleInput = ({ handleAdd, blob }) => {
   return (
     <>
       <TitleInput
-        placeholder={"Add your title for your voice description"}
+        placeholder={"Name your Voice Description"}
         value={title}
         onChange={(e) => handleChange(e)}
       />

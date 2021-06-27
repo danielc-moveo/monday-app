@@ -101,7 +101,5 @@ const _addFileToUpdate = async (mondayUserInstance, newUpdateId, myfile) => {
       },
     };
     return processedFileUploadResponse;
-  } catch (error) {
-    debugger;
-  }
+  } catch (error) {}
 };

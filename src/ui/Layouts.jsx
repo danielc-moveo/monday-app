@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 export const Header1 = styled.p`
   font-size: 22px;
   color: ${({ theme }) => theme.color};
@@ -21,4 +21,5 @@ export const IconBtn = styled.button`
   border: none;
   cursor: pointer;
   outline: none;
+  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
 `;
