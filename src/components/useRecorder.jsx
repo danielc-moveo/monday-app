@@ -7,7 +7,6 @@ const useRecorder = () => {
   const [blob, setBlob] = useState(null);
 
   useEffect(() => {
-    // Lazily obtain recorder first time we're recording.
     if (recorder === null) {
       if (isRecording) {
         requestRecorder().then(setRecorder, console.error);
@@ -15,14 +14,12 @@ const useRecorder = () => {
       return;
     }
 
-    // Manage recorder state.
     if (isRecording) {
       recorder.start();
     } else {
       recorder.stop();
     }
 
-    // Obtain the audio when ready.
     const handleData = (e) => {
       setBlob(e.data);
       const blobAudioURL = URL.createObjectURL(e.data);
