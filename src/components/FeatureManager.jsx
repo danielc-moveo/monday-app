@@ -74,7 +74,7 @@ const FeatureManager = ({ mondayUserInstance }) => {
       setTheme(theme);
       setUserId(id);
       setCurrentItemId(itemIdResponse);
-      const response = await getVoiceMessagesHistory(mondayUserInstance, itemIdResponse);
+      const response = await getVoiceMessagesHistory(mondayUserInstance,itemIdResponse);
 
       const { messagesHistory, msg } = response;
 

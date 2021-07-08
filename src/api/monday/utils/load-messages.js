@@ -18,10 +18,11 @@ export const getContext = async (mondayUserInstance) => {
 };
 
 export const getVoiceMessagesHistory = async (mondayUserInstance, itemId) => {
-  const query = ` query {items( ids : ${itemId}) {
+  const query = ` query {
           updates {
             id
             body
+            item_id
             created_at
             creator{
               id
@@ -33,10 +34,10 @@ export const getVoiceMessagesHistory = async (mondayUserInstance, itemId) => {
               public_url
             }
           }
-        }}`;
+        }`;
   try {
     const updatesResponse = await mondayUserInstance.api(query);
-    const updatesWithVoiceMemos = await getFilteredUpdates(updatesResponse);
+    const updatesWithVoiceMemos = await getFilteredUpdates(updatesResponse, itemId);
 
     return { msg: 'success', messagesHistory: updatesWithVoiceMemos };
   } catch (error) {
@@ -44,13 +45,13 @@ export const getVoiceMessagesHistory = async (mondayUserInstance, itemId) => {
   }
 };
 
-const getFilteredUpdates = async (updatesResponse) => {
-  if (updatesResponse.data.items[0].updates.length > 0) {
+const getFilteredUpdates = async (updatesResponse, itemId) => {
+  if (updatesResponse.data.updates.length > 0) {
     //has updates
-    const updatesWithVoiceMemos = updatesResponse.data.items[0].updates.filter(
-      ({ assets }) => assets.length && filterAssetsByAssetType(assets)
+    const updatesWithVoiceMemos = updatesResponse.data.updates.filter(
+      ({ assets, item_id }) =>
+        assets.length && item_id === itemId.toString() && filterAssetsByAssetType(assets)
     );
-
     return updatesWithVoiceMemos;
   }
   return null;
