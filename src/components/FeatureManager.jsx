@@ -31,7 +31,7 @@ const Wrapper = styled(FlexedColCenter)``;
 
 const LoaderContainer = styled.div`
   position: absolute;
-  top: 112px;
+  top: ${({ isFirstVm }) => (isFirstVm ? '86px' : '112px')};
 `;
 
 const FeatureManager = ({ mondayUserInstance }) => {
@@ -70,11 +70,11 @@ const FeatureManager = ({ mondayUserInstance }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { itemIdResponse, theme, id } = await getContext(mondayUserInstance);
+      const { itemIdResponse, theme, id, boardId } = await getContext(mondayUserInstance);
       setTheme(theme);
       setUserId(id);
       setCurrentItemId(itemIdResponse);
-      const response = await getVoiceMessagesHistory(mondayUserInstance,itemIdResponse);
+      const response = await getVoiceMessagesHistory(mondayUserInstance, itemIdResponse, boardId);
 
       const { messagesHistory, msg } = response;
 
@@ -111,7 +111,7 @@ const FeatureManager = ({ mondayUserInstance }) => {
                 <RecordingPlayer sendMessage={sendMessage} hasHistory={hasHistory} />
               </Wrapper>
               {isLoading && (
-                <LoaderContainer>
+                <LoaderContainer isFirstVm={!messagesHistory.length}>
                   <Loader />
                 </LoaderContainer>
               )}

@@ -5,20 +5,22 @@ export const getContext = async (mondayUserInstance) => {
       itemId,
       theme,
       user: { id },
+      boardId,
     } = contextResponse.data;
     return {
       msg: 'success',
       itemIdResponse: itemId,
       theme,
       id,
+      boardId,
     };
   } catch (error) {
     return { msg: error.message };
   }
 };
 
-export const getVoiceMessagesHistory = async (mondayUserInstance, itemId) => {
-  const query = ` query {
+export const getVoiceMessagesHistory = async (mondayUserInstance, itemId, boardId) => {
+  const query = `query {boards (ids: ${boardId}){
           updates {
             id
             body
@@ -34,10 +36,13 @@ export const getVoiceMessagesHistory = async (mondayUserInstance, itemId) => {
               public_url
             }
           }
-        }`;
+        }}`;
   try {
-    const updatesResponse = await mondayUserInstance.api(query);
-    const updatesWithVoiceMemos = await getFilteredUpdates(updatesResponse, itemId);
+    const updatesResponseByBoardId = await mondayUserInstance.api(query);
+    const updatesWithVoiceMemos = await getFilteredUpdates(
+      updatesResponseByBoardId.data.boards[0].updates,
+      itemId
+    );
 
     return { msg: 'success', messagesHistory: updatesWithVoiceMemos };
   } catch (error) {
@@ -45,10 +50,9 @@ export const getVoiceMessagesHistory = async (mondayUserInstance, itemId) => {
   }
 };
 
-const getFilteredUpdates = async (updatesResponse, itemId) => {
-  if (updatesResponse.data.updates.length > 0) {
-    //has updates
-    const updatesWithVoiceMemos = updatesResponse.data.updates.filter(
+const getFilteredUpdates = async (updates, itemId) => {
+  if (updates.length > 0) {
+    const updatesWithVoiceMemos = updates.filter(
       ({ assets, item_id }) =>
         assets.length && item_id === itemId.toString() && filterAssetsByAssetType(assets)
     );
